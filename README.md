@@ -54,23 +54,23 @@ go-task-api/
    cd go-task-api
    ```
 2. **Set up environment:**
-```bash
+   ```bash
 cp .env.example .env
-```
+   ```
 
 3. **Run with Docker:**
-```bash
+   ```bash
 make docker-up
-```
+   ```
 
 4. **Access API:**
-```bash
+   ```bash
 http://localhost:8080/api/v1/
-```
+   ```
 5. **Run tests:**
-```bash
+   ```bash
 make test
-```
+   ```
 
 📄 API Documentation
 Swagger UI: http://localhost:8080/docs
