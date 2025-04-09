@@ -49,28 +49,30 @@ go-task-api/
 ## 📦 Getting Started
 
 1. **Clone the repo:**
-   ```bash
+```bash
    git clone https://github.com/yourusername/go-task-api.git
    cd go-task-api
-   ```
+```
+
 2. **Set up environment:**
-   ```bash
+```bash
 cp .env.example .env
-   ```
+```
 
 3. **Run with Docker:**
-   ```bash
+```bash
 make docker-up
-   ```
+```
 
 4. **Access API:**
-   ```bash
+```bash
 http://localhost:8080/api/v1/
-   ```
+```
+
 5. **Run tests:**
-   ```bash
+```bash
 make test
-   ```
+```
 
 📄 API Documentation
 Swagger UI: http://localhost:8080/docs
