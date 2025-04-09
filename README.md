@@ -4,12 +4,12 @@ A fully-featured RESTful API for collaborative task and project management, buil
 
 ## 🔧 Tech Stack
 
-- **Golang** (Fiber or Gin)
+- **Golang** (Gin)
 - **PostgreSQL**
 - **JWT** for auth
 - **Bcrypt** for password hashing
 - **Docker** + **Docker Compose**
-- **GORM** or `sqlc`
+- **GORM**
 - **Makefile**
 - **GitHub Actions** for CI
 - **Swagger / Postman** for API docs
