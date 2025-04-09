@@ -50,8 +50,8 @@ go-task-api/
 
 1. **Clone the repo:**
 ```bash
-   git clone https://github.com/yourusername/go-task-api.git
-   cd go-task-api
+git clone https://github.com/yourusername/go-task-api.git
+cd go-task-api
 ```
 
 2. **Set up environment:**
