@@ -1,9 +1,13 @@
 package models
 
-import "gorm.io/gorm"
+import "time"
 
 type User struct {
-	gorm.Model
-	Username string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
+	ID          uint   `gorm:"primaryKey"`
+	Username    string `gorm:"uniqueIndex;not null"`
+	Password    string `gorm:"not null"`
+	CreatedAt   time.Time
+	Projects    []Project
+	Memberships []ProjectMember
+	Comments    []Comment
 }

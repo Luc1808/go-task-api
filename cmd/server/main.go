@@ -18,7 +18,13 @@ func main() {
 	db := db.InitDB()
 
 	// Auto-migrate models
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(
+		&models.User{},
+		&models.Project{},
+		&models.ProjectMember{},
+		&models.Task{},
+		&models.Comment{},
+	)
 
 	r := gin.Default()
 
