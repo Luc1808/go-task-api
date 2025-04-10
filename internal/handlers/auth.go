@@ -23,7 +23,7 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	// Get data from body
 	var user models.User
-	if err := ctx.ShouldBind(&user); err != nil {
+	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
@@ -38,7 +38,7 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	user.Password = string(hashedPassword)
 
 	// Save data into db
-	if err := h.DB.Create(&user); err != nil {
+	if err := h.DB.Create(&user).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user", "err": err})
 		return
 	}
