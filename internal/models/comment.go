@@ -14,3 +14,11 @@ type Comment struct {
 	UserID uint
 	// User   User `gorm:"foreignKey:UserID"`
 }
+
+// CREATE TABLE comments (
+//     id SERIAL PRIMARY KEY,
+//     content TEXT NOT NULL,
+//     created_at TIMESTAMP NOT NULL,
+//     task_id VARCHAR REFERENCES tasks(id),
+//     user_id INTEGER REFERENCES users(id)
+// );

@@ -15,3 +15,12 @@ type Task struct {
 	// Comments on this task
 	Comments []Comment `gorm:"foreignKey:TaskID"`
 }
+
+// CREATE TABLE tasks (
+//     id VARCHAR PRIMARY KEY,
+//     title VARCHAR NOT NULL,
+//     description TEXT,
+//     status VARCHAR,
+//     due_date TIMESTAMP,
+//     project_id INTEGER REFERENCES projects(id)
+// );

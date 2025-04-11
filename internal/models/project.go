@@ -15,3 +15,10 @@ type Project struct {
 	// Tasks in the project
 	Tasks []Task `gorm:"foreignKey:ProjectID"`
 }
+
+// CREATE TABLE projects (
+//     id SERIAL PRIMARY KEY,
+//     name VARCHAR NOT NULL,
+//     description TEXT,
+//     owner_id INTEGER REFERENCES users(id)
+// );
