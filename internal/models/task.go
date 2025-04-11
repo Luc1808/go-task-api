@@ -10,7 +10,8 @@ type Task struct {
 	DueDate     time.Time
 
 	ProjectID uint
-	Project   Project
+	// Project   Project
 
-	Comments []Comment
+	// Comments on this task
+	Comments []Comment `gorm:"foreignKey:TaskID"`
 }

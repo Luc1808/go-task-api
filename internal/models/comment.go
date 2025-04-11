@@ -7,9 +7,10 @@ type Comment struct {
 	Content   string `gorm:"not null"`
 	CreatedAt time.Time
 
+	// Task relationship
 	TaskID uint
-	Task   Task
+	// Task   Task `gorm:"foreignKey:TaskID"`
 
 	UserID uint
-	User   User
+	// User   User `gorm:"foreignKey:UserID"`
 }

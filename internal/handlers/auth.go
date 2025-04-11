@@ -37,6 +37,9 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 
 	user.Password = string(hashedPassword)
 
+	// Set creation time
+	user.CreatedAt = time.Now()
+
 	// Save data into db
 	if err := h.DB.Create(&user).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create user", "err": err})
