@@ -24,6 +24,7 @@ func main() {
 		&models.ProjectMember{},
 		&models.Task{},
 		&models.Comment{},
+		&models.RefreshToken{},
 	)
 
 	r := gin.Default()

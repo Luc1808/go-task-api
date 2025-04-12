@@ -12,6 +12,14 @@ import (
 	"gorm.io/gorm"
 )
 
+var accessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
+var refreshTokenSecret = os.Getenv("REFRESH_TOKEN_SECRET")
+
+const (
+	accessTokenDuration  = 30 * time.Minute
+	refreshTokenDuration = 7 * 24 * time.Hour
+)
+
 type AuthHandler struct {
 	*gorm.DB
 }
@@ -75,7 +83,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	secret := os.Getenv("JWT_SECRET")
+	secret := os.Getenv("ACCESS_TOKEN_SECRET")
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
@@ -83,4 +91,44 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
+}
+
+func generateTokenPair(userID int) (models.TokenPair, error) {
+	var tokenPair models.TokenPair
+
+	// Create access token
+	accessClaims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(accessTokenDuration).Unix(),
+	}
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	var err error
+	tokenPair.AcessToken, err = accessToken.SignedString(accessTokenSecret)
+	if err != nil {
+		return tokenPair, err
+	}
+
+	// Create refresh token
+	refreshClaims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(refreshTokenDuration).Unix(),
+	}
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	tokenPair.RefreshToken, err = refreshToken.SignedString(refreshTokenSecret)
+	if err != nil {
+		return tokenPair, err
+	}
+
+	return tokenPair, nil
+}
+
+func (h *AuthHandler) storeRefreshToken(userID int, token string, expiresAt time.Time) error {
+	refreshToken := models.RefreshToken{
+		Token:     token,
+		UserID:    userID,
+		ExpiresAt: expiresAt,
+	}
+
+	result := h.DB.Create(&refreshToken)
+	return result.Error
 }
