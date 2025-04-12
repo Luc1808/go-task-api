@@ -132,3 +132,24 @@ func (h *AuthHandler) storeRefreshToken(userID int, token string, expiresAt time
 	result := h.DB.Create(&refreshToken)
 	return result.Error
 }
+
+func (h *AuthHandler) findRefreshToken(token string, userID int) (*models.RefreshToken, error) {
+	var refreshToken models.RefreshToken
+
+	result := h.DB.Where("token = ? AND user_id = ? AND expires_at > ?", token, userID, time.Now()).First(&refreshToken)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &refreshToken, nil
+}
+
+func (h *AuthHandler) deleteRefreshToken(id int) error {
+	result := h.DB.Delete(&models.RefreshToken{}, id)
+	return result.Error
+}
+
+func (h *AuthHandler) clearExpiredTokens() error {
+	result := h.DB.Where("expires_at < ?", time.Now()).Delete(&models.RefreshToken{})
+	return result.Error
+}
