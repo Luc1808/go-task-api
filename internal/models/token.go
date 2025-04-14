@@ -3,7 +3,7 @@ package models
 import "time"
 
 type TokenPair struct {
-	AcessToken   string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
 

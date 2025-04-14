@@ -95,7 +95,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	// 	return
 	// }
 
-	ctx.JSON(http.StatusOK, gin.H{"access_token": newTokenPair.AcessToken, "refresh_token": newTokenPair.RefreshToken})
+	ctx.JSON(http.StatusOK, gin.H{"access_token": newTokenPair.AccessToken, "refresh_token": newTokenPair.RefreshToken})
 }
 
 // issue a new token pair using a valid refresh token
@@ -159,7 +159,7 @@ func generateTokenPair(userID uint) (models.TokenPair, error) {
 	}
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	var err error
-	tokenPair.AcessToken, err = accessToken.SignedString([]byte(accessTokenSecret))
+	tokenPair.AccessToken, err = accessToken.SignedString([]byte(accessTokenSecret))
 	if err != nil {
 		return tokenPair, err
 	}
@@ -208,4 +208,9 @@ func (h *AuthHandler) deleteRefreshToken(id int) error {
 func (h *AuthHandler) ClearExpiredTokens() error {
 	result := h.DB.Where("expires_at < ?", time.Now()).Delete(&models.RefreshToken{})
 	return result.Error
+}
+
+func ProtectedHandler(ctx *gin.Context) {
+	userID, _ := ctx.Get("userID")
+	ctx.JSON(http.StatusOK, gin.H{"message": "Welcome to proctected route", "userID": userID})
 }
