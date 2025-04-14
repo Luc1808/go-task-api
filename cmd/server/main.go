@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Luc1808/go-task-api/internal/db"
+	"github.com/Luc1808/go-task-api/internal/handlers"
 	"github.com/Luc1808/go-task-api/internal/models"
 	"github.com/Luc1808/go-task-api/internal/routes"
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,13 @@ func main() {
 		&models.Comment{},
 		&models.RefreshToken{},
 	)
+
+	authHandler := handlers.NewAuthHandler(db)
+
+	// Clean up expired tokens on start up
+	if err := authHandler.ClearExpiredTokens(); err != nil {
+		log.Printf("Error clearing expired tokens on startup: %v", err)
+	}
 
 	r := gin.Default()
 

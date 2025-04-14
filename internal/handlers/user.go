@@ -78,25 +78,30 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	}
 
 	// Generate JWT
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
-	})
-
-	secret := os.Getenv("ACCESS_TOKEN_SECRET")
-	tokenString, err := token.SignedString([]byte(secret))
+	newTokenPair, err := generateTokenPair(user.ID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens", "err": err})
 		return
 	}
+	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	// 	"user_id": user.ID,
+	// 	"exp":     time.Now().Add(time.Hour * 24).Unix(),
+	// })
 
-	ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
+	// secret := os.Getenv("ACCESS_TOKEN_SECRET")
+	// tokenString, err := token.SignedString([]byte(secret))
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+	// 	return
+	// }
+
+	ctx.JSON(http.StatusOK, gin.H{"access_token": newTokenPair.AcessToken, "refresh_token": newTokenPair.RefreshToken})
 }
 
 // issue a new token pair using a valid refresh token
 func (h *AuthHandler) RefreshHandler(ctx *gin.Context) {
 	var tokenRequest struct {
-		RefreshToken string `json:"refresh+token" binding:"required"`
+		RefreshToken string `json:"refresh_token" binding:"required"`
 	}
 
 	if err := ctx.ShouldBindJSON(&tokenRequest); nil != err {
@@ -121,7 +126,7 @@ func (h *AuthHandler) RefreshHandler(ctx *gin.Context) {
 		return
 	}
 
-	userID := int(claims["user_id"].(float64))
+	userID := uint(claims["user_id"].(float64))
 
 	// Verify token in DB
 	storedToken, err := h.findRefreshToken(tokenRequest.RefreshToken, userID)
@@ -144,7 +149,7 @@ func (h *AuthHandler) RefreshHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, newTokenPair)
 }
 
-func generateTokenPair(userID int) (models.TokenPair, error) {
+func generateTokenPair(userID uint) (models.TokenPair, error) {
 	var tokenPair models.TokenPair
 
 	// Create access token
@@ -154,7 +159,7 @@ func generateTokenPair(userID int) (models.TokenPair, error) {
 	}
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	var err error
-	tokenPair.AcessToken, err = accessToken.SignedString(accessTokenSecret)
+	tokenPair.AcessToken, err = accessToken.SignedString([]byte(accessTokenSecret))
 	if err != nil {
 		return tokenPair, err
 	}
@@ -165,7 +170,7 @@ func generateTokenPair(userID int) (models.TokenPair, error) {
 		"exp":     time.Now().Add(refreshTokenDuration).Unix(),
 	}
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	tokenPair.RefreshToken, err = refreshToken.SignedString(refreshTokenSecret)
+	tokenPair.RefreshToken, err = refreshToken.SignedString([]byte(refreshTokenSecret))
 	if err != nil {
 		return tokenPair, err
 	}
@@ -173,7 +178,7 @@ func generateTokenPair(userID int) (models.TokenPair, error) {
 	return tokenPair, nil
 }
 
-func (h *AuthHandler) storeRefreshToken(userID int, token string, expiresAt time.Time) error {
+func (h *AuthHandler) storeRefreshToken(userID uint, token string, expiresAt time.Time) error {
 	refreshToken := models.RefreshToken{
 		Token:     token,
 		UserID:    userID,
@@ -184,7 +189,7 @@ func (h *AuthHandler) storeRefreshToken(userID int, token string, expiresAt time
 	return result.Error
 }
 
-func (h *AuthHandler) findRefreshToken(token string, userID int) (*models.RefreshToken, error) {
+func (h *AuthHandler) findRefreshToken(token string, userID uint) (*models.RefreshToken, error) {
 	var refreshToken models.RefreshToken
 
 	result := h.DB.Where("token = ? AND user_id = ? AND expires_at > ?", token, userID, time.Now()).First(&refreshToken)
@@ -200,7 +205,7 @@ func (h *AuthHandler) deleteRefreshToken(id int) error {
 	return result.Error
 }
 
-func (h *AuthHandler) clearExpiredTokens() error {
+func (h *AuthHandler) ClearExpiredTokens() error {
 	result := h.DB.Where("expires_at < ?", time.Now()).Delete(&models.RefreshToken{})
 	return result.Error
 }

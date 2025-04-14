@@ -10,7 +10,7 @@ type TokenPair struct {
 type RefreshToken struct {
 	ID        int       `gorm:"primaryKey"`
 	Token     string    `gorm:"type:text;not null;index"`
-	UserID    int       `gorm:"not null;index"`
+	UserID    uint      `gorm:"not null;index"`
 	User      User      `gorm:"foreignKey:UserID"`
 	ExpiresAt time.Time `gorm:"not null"`
 	CreatedAt time.Time
