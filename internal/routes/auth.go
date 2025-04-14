@@ -13,5 +13,6 @@ func AuthRoutes(r *gin.Engine, db *gorm.DB) {
 	{
 		auth.POST("/register", handler.Register)
 		auth.POST("/login", handler.Login)
+		auth.POST("/refresh", handler.RefreshHandler)
 	}
 }

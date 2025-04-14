@@ -93,6 +93,57 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
+// issue a new token pair using a valid refresh token
+func (h *AuthHandler) RefreshHandler(ctx *gin.Context) {
+	var tokenRequest struct {
+		RefreshToken string `json:"refresh+token" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&tokenRequest); nil != err {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Input"})
+		return
+	}
+
+	// Parse refresh token
+	token, err := jwt.Parse(tokenRequest.RefreshToken, func(token *jwt.Token) (interface{}, error) {
+		return refreshTokenSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+
+	// Extract claims
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse token claims"})
+		return
+	}
+
+	userID := int(claims["user_id"].(float64))
+
+	// Verify token in DB
+	storedToken, err := h.findRefreshToken(tokenRequest.RefreshToken, userID)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		return
+	}
+
+	// Generate new token pair
+	newTokenPair, err := generateTokenPair(userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate tokens"})
+		return
+	}
+
+	// Change old for new tokens
+	h.deleteRefreshToken(storedToken.ID)
+	h.storeRefreshToken(userID, newTokenPair.RefreshToken, time.Now().Add(refreshTokenDuration))
+
+	ctx.JSON(http.StatusOK, newTokenPair)
+}
+
 func generateTokenPair(userID int) (models.TokenPair, error) {
 	var tokenPair models.TokenPair
 
