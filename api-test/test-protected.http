@@ -1,2 +1,2 @@
 GET http://localhost:8080/auth/protected
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ2NjEwNzEsInVzZXJfaWQiOjF9.QTk_XSBvlU8DaC0RVhJl1AXSwZWiOwRwmSwMGJkSayA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDQ3Mzg2ODcsInVzZXJfaWQiOjF9.o_1I7hCuiY_WcLRNqw0_lQtmJ5Enhq4aOaMrTLvmZDc

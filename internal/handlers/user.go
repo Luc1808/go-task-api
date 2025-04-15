@@ -95,6 +95,13 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	// 	return
 	// }
 
+	// Store the refresh token in the database
+	err = h.storeRefreshToken(user.ID, newTokenPair.RefreshToken, time.Now().Add(refreshTokenDuration))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to store refresh token"})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"access_token": newTokenPair.AccessToken, "refresh_token": newTokenPair.RefreshToken})
 }
 
@@ -111,11 +118,11 @@ func (h *AuthHandler) RefreshHandler(ctx *gin.Context) {
 
 	// Parse refresh token
 	token, err := jwt.Parse(tokenRequest.RefreshToken, func(token *jwt.Token) (interface{}, error) {
-		return refreshTokenSecret, nil
+		return []byte(refreshTokenSecret), nil
 	})
 
 	if err != nil || !token.Valid {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token", "details": err.Error()})
 		return
 	}
 
@@ -131,7 +138,7 @@ func (h *AuthHandler) RefreshHandler(ctx *gin.Context) {
 	// Verify token in DB
 	storedToken, err := h.findRefreshToken(tokenRequest.RefreshToken, userID)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token", "db_error": err.Error()})
 		return
 	}
 
